@@ -1,33 +1,50 @@
 # Task Tracker
 
-A learning project implementing a simple REST API backend (FastAPI)
-with a separate frontend, following a layered architecture with
-in-memory storage.
+A small task management app with a FastAPI backend and a browser-based frontend.
 
-## Status
+## Run the app
 
-This repository currently contains the **backend skeleton only**
-(health check endpoint). CRUD functionality, task status rules, and
-the frontend will be added in subsequent tasks.
+1. Open a terminal in the repository root.
+2. Create and activate a virtual environment:
+   - Windows PowerShell:
+     ```powershell
+     py -3 -m venv .venv
+     .\.venv\Scripts\Activate.ps1
+     ```
+   - macOS/Linux:
+     ```bash
+     python3 -m venv .venv
+     source .venv/bin/activate
+     ```
+3. Install the backend dependencies:
+   ```bash
+   cd backend
+   pip install -r requirements.txt pytest
+   ```
+4. Start the backend:
+   ```bash
+   uvicorn app.main:app --reload --port 8000
+   ```
+   The API will be available at http://127.0.0.1:8000.
+5. Open the frontend in your browser at http://127.0.0.1:8000/.
+   The backend serves the UI on the root route, so the frontend opens automatically once the server is running.
 
-## Architecture
+## Run tests
 
-See `ADR-001` (Use a Simple Layered FastAPI Architecture with
-In-Memory Storage) for the full architecture decision, including:
+From the backend folder, run:
 
-- Layered structure: Routes → Service → Storage → In-memory data store
-- Task model: title, description, status, priority, assignee
-- Status transition rules (ToDo ↔ InProgress → Done, no reverse from Done)
-- Explicit out-of-scope items: authentication, user accounts,
-  multi-tenancy, real-time updates, mobile apps
+```bash
+pytest -q
+```
 
-## Structure
-task-tracker/
-├── backend/ # FastAPI REST API (see backend/README.md)
-├── frontend/ # Vanilla HTML/CSS/JS (added later)
-└── README.md
+You can also use:
 
-## Getting Started
+```bash
+python -m pytest -q
+```
 
-See [`backend/README.md`](backend/README.md) for setup, run, and test
-instructions.
+## Project structure
+
+- backend/ — FastAPI REST API
+- frontend/ — Vanilla HTML/CSS/JS UI
+- docs/ — project notes and design documents
