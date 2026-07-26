@@ -1,0 +1,6 @@
+HTTP/1.1 307 Temporary Redirect
+date: Sat, 25 Jul 2026 11:24:01 GMT
+server: uvicorn
+content-length: 0
+location: http://localhost:8000/tasks
+
