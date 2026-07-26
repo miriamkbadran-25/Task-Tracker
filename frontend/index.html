@@ -6,59 +6,146 @@
   <title>Task Tracker — Kanban</title>
   <style>
     :root{
-      --bg:#f4f6f8; --card:#ffffff; --muted:#667085;
-      --accent:#3b82f6; --danger:#ef4444; --success:#10b981;
-      --gap:16px; --radius:8px;
-      font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+      --bg:#040816;
+      --bg-soft:#0b1120;
+      --card:#0f172a;
+      --card-2:#111c33;
+      --muted:#8ea0bd;
+      --accent:#7c3aed;
+      --accent-2:#38bdf8;
+      --danger:#fb7185;
+      --success:#34d399;
+      --text:#f8fafc;
+      --border:rgba(255,255,255,0.12);
+      --gap:16px;
+      --radius:16px;
+      font-family: 'Trebuchet MS', 'Segoe UI', Tahoma, Arial, sans-serif;
     }
-    html,body{height:100%;margin:0;background:var(--bg);color:#0f172a}
-    header{padding:24px 32px;border-bottom:1px solid rgba(15,23,42,0.06);background:linear-gradient(90deg,rgba(255,255,255,0.6),transparent)}
-    .site-title{margin:0;font-size:20px;letter-spacing:-0.02em}
-    .site-sub{margin:6px 0 0;color:var(--muted);font-size:13px}
 
-    main{padding:24px 32px}
-    .board{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gap);align-items:start}
-    .column{background:transparent}
-    .column-header{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
-    .column-title{font-weight:600;font-size:14px}
-    .column-count{color:var(--muted);font-size:13px}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;overflow-x:hidden;background:var(--bg);color:var(--text)}
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.28), transparent 24%),
+        radial-gradient(circle at 85% 0%, rgba(124,58,237,0.3), transparent 20%),
+        linear-gradient(135deg, #040816 0%, #020617 55%, #060b1f 100%);
+      position:relative;
+    }
+    body::before,
+    body::after{
+      content:'';
+      position:fixed;
+      inset:auto;
+      width:420px;height:420px;border-radius:50%;filter:blur(80px);opacity:0.35;pointer-events:none;animation:drift 12s ease-in-out infinite alternate;
+      z-index:0;
+    }
+    body::before{top:-120px;left:-120px;background:rgba(56,189,248,0.6)}
+    body::after{right:-120px;bottom:-140px;background:rgba(124,58,237,0.55);animation-duration:16s}
 
-    .column-list{background:transparent;padding:12px;border-radius:8px;min-height:160px;transition:background-color 0.2s ease}
-    .column-list.drag-over{background-color:rgba(59,130,246,0.08)}
-    .card{background:var(--card);border-radius:8px;padding:12px;margin-bottom:12px;box-shadow:0 1px 2px rgba(15,23,42,0.04);border:1px solid rgba(15,23,42,0.03)}
-    .card.dragging{opacity:0.5;box-shadow:0 4px 12px rgba(15,23,42,0.12)}
-    .card-title{margin:0 0 6px;font-size:14px}
-    .card-desc{margin:0 0 10px;color:var(--muted);font-size:13px}
-    .card-meta{display:flex;gap:8px;align-items:center}
-    .chip{display:inline-block;padding:4px 8px;border-radius:999px;font-size:12px;background:#f1f5f9;color:#0f172a}
-    .chip.priority{background:#fff3f2;color:var(--danger);border:1px solid rgba(239,68,68,0.08)}
-    .chip.assignee{background:#eef2ff;color:var(--accent);border:1px solid rgba(59,130,246,0.08)}
-    .edit-btn{margin-left:auto;background:transparent;border:1px solid rgba(15,23,42,0.06);padding:6px 8px;border-radius:6px;cursor:pointer}
-    .delete-btn{background:transparent;border:1px solid rgba(239,68,68,0.2);padding:6px 8px;border-radius:6px;cursor:pointer;color:var(--danger);transition:all 0.2s ease}
-    .delete-btn:hover{background:rgba(239,68,68,0.08);border-color:rgba(239,68,68,0.4)}
+    header{
+      padding:24px 32px 28px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+      background:linear-gradient(135deg, rgba(124,58,237,0.22), rgba(56,189,248,0.14));
+      backdrop-filter:blur(20px);
+      position:sticky;top:0;z-index:10;box-shadow:0 10px 35px rgba(2,6,23,0.35);
+    }
+    .site-title{margin:0;font-size:32px;letter-spacing:-0.02em;line-height:1.05;font-weight:800;background:linear-gradient(90deg,#f8fafc 0%, #dbeafe 25%, #c4b5fd 60%, #7dd3fc 100%);-webkit-background-clip:text;background-clip:text;color:transparent;display:inline-block}
+    .site-sub{margin:8px 0 0;color:var(--muted);font-size:14px}
+
+    main{padding:24px 32px 36px;position:relative;z-index:1}
+    #board-status{position:relative;z-index:1}
+    .board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--gap);align-items:start}
+    .column{background:linear-gradient(180deg, rgba(15,23,42,0.92), rgba(8,15,28,0.92));border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:12px;box-shadow:0 18px 40px rgba(2,6,23,0.38);animation:columnIn 0.45s ease both}
+    .column-header{display:flex;align-items:center;justify-content:space-between;margin:0 0 10px;padding:2px 2px 8px}
+    .column-title{font-weight:700;font-size:16px;margin:0;color:var(--text)}
+    .column-count{display:grid;place-items:center;width:32px;height:32px;border-radius:999px;background:linear-gradient(135deg, rgba(124,58,237,0.4), rgba(56,189,248,0.3));color:#f5f3ff;font-size:13px;font-weight:700;box-shadow:0 8px 18px rgba(56,189,248,0.16)}
+
+    .column-list{background:linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02));padding:12px;border-radius:14px;min-height:190px;border:1px dashed rgba(255,255,255,0.10);transition:all 0.25s ease}
+    .column-list.drag-over{background:rgba(56,189,248,0.15);border-color:rgba(56,189,248,0.42);transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(56,189,248,0.2)}
+
+    .card{background:linear-gradient(135deg, rgba(17,24,39,0.98), rgba(30,41,59,0.96));border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:0 18px 38px rgba(2,6,23,0.42);border:1px solid rgba(255,255,255,0.08);cursor:grab;animation:cardIn 0.3s ease both;transition:transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease}
+    .card:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 24px 42px rgba(2,6,23,0.55);border-color:rgba(124,58,237,0.38)}
+    .card.dragging{opacity:0.6;transform:rotate(-2deg) scale(0.98);box-shadow:0 10px 26px rgba(2,6,23,0.35)}
+    .card-title{margin:0 0 6px;font-size:16px;font-weight:700}
+    .card-desc{margin:0 0 10px;color:var(--muted);font-size:14px;line-height:1.5}
+    .card-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+    .card-footer{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+    .chip{display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;font-size:12px;background:rgba(255,255,255,0.08);color:#e2e8f0;border:1px solid rgba(255,255,255,0.08)}
+    .chip.priority{background:rgba(251,113,133,0.16);color:#fecdd3;border-color:rgba(251,113,133,0.24)}
+    .chip.assignee{background:rgba(56,189,248,0.16);color:#bae6fd;border-color:rgba(56,189,248,0.24)}
+    .chip.overdue{background:rgba(251,113,133,0.2);color:#fecdd3;border-color:rgba(251,113,133,0.3)}
+    .task-tags{display:flex;flex-wrap:wrap;gap:6px;margin:0}
+    .tag-chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+    .tag-chip{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:999px;font-size:12px;background:rgba(124,58,237,0.16);color:#ddd6fe;border:1px solid rgba(124,58,237,0.24)}
+    .tag-chip button{background:transparent;border:none;color:inherit;padding:0;cursor:pointer;font:inherit;line-height:1}
+    .tag-suggestions{display:flex;flex-direction:column;gap:6px;margin-top:8px;border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px;background:rgba(15,23,42,0.78)}
+    .tag-suggestions.hidden{display:none}
+    .tag-suggestion{background:transparent;border:none;padding:0;text-align:left;cursor:pointer;font-size:13px;color:var(--text)}
+    .tag-suggestion:hover{color:#93c5fd}
+    .field-error{color:var(--danger);font-size:12px;min-height:18px}
+    .tag-filter-highlight{animation:tagFilterPulse 0.8s ease;}
+
+    .edit-btn,
+    .delete-btn,
+    .modal-close,
+    .tag-suggestion{
+      transition:transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .edit-btn{margin-left:auto;background:linear-gradient(135deg, rgba(124,58,237,0.2), rgba(56,189,248,0.16));border:1px solid rgba(255,255,255,0.12);padding:6px 10px;border-radius:10px;cursor:pointer;color:var(--text);box-shadow:0 8px 18px rgba(2,6,23,0.2)}
+    .edit-btn:hover{transform:translateY(-1px);background:linear-gradient(135deg, rgba(124,58,237,0.3), rgba(56,189,248,0.24));border-color:rgba(124,58,237,0.4)}
+    .delete-btn{background:rgba(251,113,133,0.1);border:1px solid rgba(251,113,133,0.22);padding:6px 10px;border-radius:10px;cursor:pointer;color:var(--danger);box-shadow:0 8px 18px rgba(2,6,23,0.16)}
+    .delete-btn:hover{transform:translateY(-1px);background:rgba(251,113,133,0.18);border-color:rgba(251,113,133,0.36)}
+
     .modal.hidden{display:none}
-    .modal{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(15,23,42,0.45);z-index:20;overflow-y:auto;}
+    .modal{position:fixed;inset:0;display:grid;place-items:center;padding:16px;background:rgba(2,6,23,0.82);z-index:20;overflow-y:auto;}
     .modal-overlay{position:absolute;inset:0;background:transparent}
-    .modal-content{position:relative;background:var(--card);border-radius:var(--radius);width:100%;max-width:520px;max-height:calc(100vh - 40px);padding:24px;box-shadow:0 20px 50px rgba(15,23,42,0.15);z-index:1;overflow-y:auto;}
+    .modal-content{position:relative;background:linear-gradient(180deg, rgba(15,23,42,0.98), rgba(2,6,23,0.98));border:1px solid rgba(255,255,255,0.10);border-radius:20px;width:100%;max-width:540px;max-height:calc(100vh - 40px);padding:24px;box-shadow:0 30px 70px rgba(2,6,23,0.7);z-index:1;overflow-y:auto;animation:modalIn 0.24s ease}
     .modal-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
-    .modal-close{background:transparent;border:none;font-size:20px;cursor:pointer;line-height:1}
+    .modal-close{background:transparent;border:none;font-size:20px;cursor:pointer;line-height:1;color:var(--text)}
     .form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
-    .form-group label{font-size:13px;color:var(--muted)}
-    .form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(15,23,42,0.12);font:inherit}
+    .form-group label{font-size:14px;color:var(--muted)}
+    .form-group input,.form-group textarea,.form-group select{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);font:inherit;background:rgba(8,15,28,0.74);color:var(--text)}
     .form-group textarea{min-height:96px;resize:vertical}
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:rgba(124,58,237,0.6);box-shadow:0 0 0 3px rgba(124,58,237,0.16)}
     .form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+    .banner{padding:10px 12px;border-radius:12px;background:rgba(255,255,255,0.06);color:var(--text);animation:fadeSlide 0.25s ease;box-shadow:0 8px 18px rgba(2,6,23,0.16)}
+    .banner.error{background:rgba(251,113,133,0.16);color:var(--danger)}
+    .banner.empty{background:rgba(56,189,248,0.12)}
+    .empty-placeholder{padding:24px;border-radius:12px;background:rgba(255,255,255,0.05);color:var(--muted);text-align:center;animation:pulse 1.6s ease-in-out infinite;border:1px dashed rgba(255,255,255,0.08)}
+
+    @keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes modalIn{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+    @keyframes fadeSlide{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes pulse{0%,100%{opacity:0.85}50%{opacity:0.6}}
+    @keyframes tagFilterPulse{0%{box-shadow:0 0 0 0 rgba(56,189,248,0.28);transform:translateY(0)}50%{box-shadow:0 0 0 10px rgba(56,189,248,0.08);transform:translateY(-1px)}100%{box-shadow:0 0 0 0 rgba(56,189,248,0)}}
+    @keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(30px,-30px,0) scale(1.1)}}
+    @keyframes columnIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
     @media (max-width:900px){.board{grid-template-columns:repeat(1,1fr)}}
   </style>
 </head>
 <body>
   <header>
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-      <div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div style="flex:1 1 280px;min-width:260px">
         <h1 class="site-title">Task Tracker</h1>
-        <p class="site-sub">A simple Kanban board — static preview</p>
+        <p class="site-sub">A sharper, calmer way to manage work.</p>
       </div>
-      <button id="new-task-btn" class="edit-btn">New Task</button>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;border:1px solid rgba(255,255,255,0.10);border-radius:16px;background:rgba(8,15,28,0.72);box-shadow:0 12px 28px rgba(2,6,23,0.28)">
+        <label for="task-filter" style="font-size:13px;color:var(--muted)">Filter</label>
+        <select id="task-filter" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);font:inherit;background:rgba(15,23,42,0.95);color:var(--text)">
+          <option value="all">All tasks</option>
+          <option value="overdue">Overdue only</option>
+          <option value="non-overdue">Non-overdue only</option>
+        </select>
+        <label for="tag-filter" style="font-size:13px;color:var(--muted)">Tag</label>
+        <select id="tag-filter" style="padding:8px 10px;border-radius:10px;border:1px solid rgba(255,255,255,0.12);font:inherit;background:rgba(15,23,42,0.95);color:var(--text)">
+          <option value="">All tags</option>
+        </select>
+        <button id="new-task-btn" class="edit-btn">New Task</button>
+      </div>
     </div>
   </header>
 
@@ -126,6 +213,9 @@
   <script>
     const API_BASE = 'http://localhost:8000';
     let tasks = [];
+    let currentOverdueFilter = null;
+    let currentTagFilter = '';
+    let currentTaskDueDate = '';
     const boardStatusEl = document.getElementById('board-status');
 
     function setBoardStatus(state, message) {
@@ -158,18 +248,54 @@
       boardStatusEl.appendChild(banner);
     }
 
+    function getEmptyBoardMessage() {
+      if (currentOverdueFilter === true) return 'There are no overdue tasks';
+      if (currentOverdueFilter === false) return 'There are no non-overdue tasks';
+      return 'No tasks yet — create the first task';
+    }
+
+    async function hasAnyTasks() {
+      try {
+        const res = await fetch(`${API_BASE}/tasks`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        return Array.isArray(data) && data.length > 0;
+      } catch (err) {
+        console.error('hasAnyTasks error', err);
+        return false;
+      }
+    }
+
+    async function updateBoardStatusForTasks() {
+      if (!tasks.length) {
+        const hasTasks = await hasAnyTasks();
+        const message = hasTasks ? getEmptyBoardMessage() : 'No tasks yet — create the first task';
+        setBoardStatus('empty', message);
+      } else {
+        setBoardStatus(null);
+      }
+    }
+
     // Try to load list via API; if the backend doesn't expose GET /tasks,
     // fall back to parsing any existing cards already in the DOM.
     async function fetchTasks() {
       setBoardStatus('loading', 'Loading tasks...');
       try {
-        const res = await fetch(`${API_BASE}/tasks`);
+        const params = new URLSearchParams();
+        if (currentOverdueFilter !== null) {
+          params.set('overdue', currentOverdueFilter ? 'true' : 'false');
+        }
+        if (currentTagFilter) {
+          params.set('tag', currentTagFilter);
+        }
+        const queryString = params.toString();
+        const res = await fetch(`${API_BASE}/tasks${queryString ? `?${queryString}` : ''}`);
         if (res.ok) {
           const data = await res.json();
           tasks = Array.isArray(data) ? data : [];
           renderBoard(tasks);
-          if (!tasks.length) setBoardStatus('empty', 'No tasks yet — create the first task');
-          else setBoardStatus(null);
+          await updateBoardStatusForTasks();
+          await loadTagFilterOptions();
           return tasks;
         }
         // non-ok response
@@ -232,6 +358,7 @@
         if (res.ok) {
           tasks = tasks.filter((t) => String(t.id) !== String(taskId));
           renderBoard(tasks);
+          await updateBoardStatusForTasks();
           return true;
         } else {
           console.error('deleteTask failed', res.status);
@@ -248,6 +375,8 @@
     let taskModal;
     let taskForm;
     let newTaskBtn;
+    let taskFilterSelect;
+    let tagFilterSelect;
     let modalTitleEl;
     let taskIdInput;
     let titleInput;
@@ -255,12 +384,209 @@
     let statusInput;
     let priorityInput;
     let assigneeInput;
+    let dueDateInput;
+    let taskTagsInput;
+    let taskTagsSuggestionsEl;
+    let taskTagsChipRowEl;
+    let taskTagsErrorEl;
     let formErrorEl;
     let titleErrorEl;
+    let dueDateErrorEl;
+    let selectedTaskTags = [];
+
+    function getTodayDateString() {
+      const today = new Date();
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function isDateBeforeToday(value) {
+      if (!value) return false;
+      const [year, month, day] = value.split('-').map(Number);
+      const selected = new Date(year, month - 1, day);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return selected < today;
+    }
+
+    function setFieldError(element, message) {
+      if (element) element.textContent = message || '';
+    }
+
+    function toCamelCaseTag(tag) {
+      const text = String(tag || '').trim();
+      if (!text) return '';
+
+      const spaced = text
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+        .replace(/[^0-9A-Za-z]+/g, ' ')
+        .trim();
+      if (!spaced) return '';
+
+      const words = spaced.split(/\s+/).filter(Boolean);
+      return words
+        .map((word) => {
+          if (word.length > 1 && word === word.toUpperCase()) {
+            return word;
+          }
+          return word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        .join('');
+    }
+
+    function normalizeTags(tags) {
+      if (!Array.isArray(tags)) return [];
+      const uniqueTags = [];
+      const seen = new Set();
+      tags.forEach((tag) => {
+        const normalized = toCamelCaseTag(tag);
+        if (!normalized) return;
+        const key = normalized.toLowerCase();
+        if (!seen.has(key)) {
+          seen.add(key);
+          uniqueTags.push(normalized);
+        }
+      });
+      return uniqueTags;
+    }
+
+    function renderTagChips() {
+      if (!taskTagsChipRowEl) return;
+      taskTagsChipRowEl.innerHTML = '';
+      if (!selectedTaskTags.length) return;
+      selectedTaskTags.forEach((tag) => {
+        const chip = document.createElement('span');
+        chip.className = 'tag-chip';
+        const label = document.createElement('span');
+        label.textContent = tag;
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', `Remove tag ${tag}`);
+        removeBtn.textContent = '×';
+        removeBtn.addEventListener('click', () => {
+          selectedTaskTags = selectedTaskTags.filter((item) => item.toLowerCase() !== tag.toLowerCase());
+          renderTagChips();
+          setFieldError(taskTagsErrorEl, '');
+        });
+        chip.appendChild(label);
+        chip.appendChild(removeBtn);
+        taskTagsChipRowEl.appendChild(chip);
+      });
+    }
+
+    function addSelectedTag(tag) {
+      const normalized = toCamelCaseTag(tag);
+      if (!normalized) return false;
+      const exists = selectedTaskTags.some((item) => item.toLowerCase() === normalized.toLowerCase());
+      if (exists) return false;
+      selectedTaskTags.push(normalized);
+      renderTagChips();
+      setFieldError(taskTagsErrorEl, '');
+      return true;
+    }
+
+    function resetTagState() {
+      selectedTaskTags = [];
+      renderTagChips();
+      setFieldError(taskTagsErrorEl, '');
+      if (taskTagsInput) taskTagsInput.value = '';
+      if (taskTagsSuggestionsEl) {
+        taskTagsSuggestionsEl.innerHTML = '';
+        taskTagsSuggestionsEl.classList.add('hidden');
+      }
+    }
+
+    function setModalTags(tags) {
+      selectedTaskTags = normalizeTags(tags);
+      renderTagChips();
+    }
+
+    function renderTagSuggestions(tags) {
+      if (!taskTagsSuggestionsEl) return;
+      taskTagsSuggestionsEl.innerHTML = '';
+      const cleanedTags = normalizeTags(tags);
+      if (!cleanedTags.length) {
+        taskTagsSuggestionsEl.classList.add('hidden');
+        return;
+      }
+      taskTagsSuggestionsEl.classList.remove('hidden');
+      cleanedTags.forEach((tag) => {
+        if (selectedTaskTags.some((item) => item.toLowerCase() === tag.toLowerCase())) return;
+        const suggestion = document.createElement('button');
+        suggestion.type = 'button';
+        suggestion.className = 'tag-suggestion';
+        suggestion.textContent = tag;
+        suggestion.addEventListener('click', () => {
+          addSelectedTag(tag);
+          renderTagSuggestions([]);
+          if (taskTagsInput) taskTagsInput.value = '';
+        });
+        taskTagsSuggestionsEl.appendChild(suggestion);
+      });
+      if (!taskTagsSuggestionsEl.children.length) {
+        taskTagsSuggestionsEl.classList.add('hidden');
+      }
+    }
+
+    async function fetchTagSuggestions(query) {
+      if (!taskTagsSuggestionsEl) return;
+      const trimmed = String(query || '').trim();
+      if (!trimmed) {
+        renderTagSuggestions([]);
+        return;
+      }
+      try {
+        const res = await fetch(`${API_BASE}/tags/suggestions?q=${encodeURIComponent(trimmed)}`);
+        if (!res.ok) return;
+        const suggestions = await res.json();
+        renderTagSuggestions(Array.isArray(suggestions) ? suggestions : []);
+      } catch (err) {
+        console.error('fetchTagSuggestions error', err);
+      }
+    }
+
+    function highlightTagFilter() {
+      if (!tagFilterSelect) return;
+      tagFilterSelect.classList.remove('tag-filter-highlight');
+      void tagFilterSelect.offsetWidth;
+      tagFilterSelect.classList.add('tag-filter-highlight');
+    }
+
+    async function loadTagFilterOptions() {
+      if (!tagFilterSelect) return;
+      try {
+        const res = await fetch(`${API_BASE}/tags/suggestions?q=`);
+        if (!res.ok) return;
+        const suggestions = await res.json();
+        const options = normalizeTags(Array.isArray(suggestions) ? suggestions : []);
+        const currentValue = tagFilterSelect.value || currentTagFilter;
+        tagFilterSelect.innerHTML = '<option value="">All tags</option>';
+        options.forEach((tag) => {
+          const option = document.createElement('option');
+          option.value = tag;
+          option.textContent = tag;
+          tagFilterSelect.appendChild(option);
+        });
+        if (currentValue && options.includes(currentValue)) {
+          tagFilterSelect.value = currentValue;
+          currentTagFilter = currentValue;
+        } else {
+          tagFilterSelect.value = '';
+          currentTagFilter = '';
+        }
+        highlightTagFilter();
+      } catch (err) {
+        console.error('loadTagFilterOptions error', err);
+      }
+    }
 
     function clearModalErrors() {
-      if (formErrorEl) formErrorEl.textContent = '';
-      if (titleErrorEl) titleErrorEl.textContent = '';
+      setFieldError(formErrorEl, '');
+      setFieldError(titleErrorEl, '');
+      setFieldError(dueDateErrorEl, '');
+      setFieldError(taskTagsErrorEl, '');
     }
 
     function closeModal() {
@@ -268,7 +594,9 @@
       taskModal.classList.add('hidden');
       clearModalErrors();
       taskForm?.reset();
+      resetTagState();
       if (taskIdInput) taskIdInput.value = '';
+      currentTaskDueDate = '';
     }
 
     function openModal(mode, task = null) {
@@ -281,6 +609,12 @@
       statusInput.value = task?.status || 'ToDo';
       priorityInput.value = task?.priority || 'Medium';
       assigneeInput.value = task?.assignee && task.assignee !== 'Unassigned' ? task.assignee : '';
+      currentTaskDueDate = task?.due_date || '';
+      setModalTags(task?.tags || []);
+      if (dueDateInput) {
+        dueDateInput.min = getTodayDateString();
+        dueDateInput.value = task?.due_date || '';
+      }
       taskModal.classList.remove('hidden');
       titleInput.focus();
     }
@@ -294,19 +628,41 @@
       clearModalErrors();
       const title = titleInput.value.trim();
       if (!title) {
-        titleErrorEl.textContent = 'Title is required';
+        setFieldError(titleErrorEl, 'Title is required');
         titleInput.focus();
         return;
       }
 
+      if (dueDateInput && dueDateInput.value && isDateBeforeToday(dueDateInput.value)) {
+        setFieldError(dueDateErrorEl, 'Due date must be today or later');
+        dueDateInput.focus();
+        return;
+      }
+
+      const normalizedTags = normalizeTags(selectedTaskTags);
       const payload = {
         title,
         description: descInput.value || '',
         status: statusInput.value,
         priority: priorityInput.value,
         assignee: assigneeInput.value.trim() || null,
+        tags: normalizedTags,
       };
       const taskId = taskIdInput.value;
+      if (!taskId && dueDateInput?.value) {
+        payload.due_date = dueDateInput.value;
+      }
+      if (taskId && dueDateInput && dueDateInput.value !== currentTaskDueDate) {
+        payload.due_date = dueDateInput.value ? dueDateInput.value : null;
+      }
+      if (taskId) {
+        const existingTask = getTaskById(taskId);
+        const existingTags = normalizeTags(existingTask?.tags || []);
+        const tagsChanged = JSON.stringify(existingTags) !== JSON.stringify(normalizedTags);
+        if (!tagsChanged) {
+          delete payload.tags;
+        }
+      }
       const url = taskId ? `${API_BASE}/tasks/${encodeURIComponent(taskId)}` : `${API_BASE}/tasks`;
       const method = taskId ? 'PATCH' : 'POST';
 
@@ -321,12 +677,29 @@
           closeModal();
           clearModalErrors();
           await fetchTasks();
+          highlightTagFilter();
           return;
         }
 
         const body = await res.json().catch(() => null);
         if (res.status === 422) {
-          setModalError(body?.message || 'Validation failed');
+          const detail = Array.isArray(body?.detail) ? body.detail : [];
+          const titleDetail = detail.find((item) => Array.isArray(item.loc) ? item.loc.includes('title') : String(item.loc).includes('title'));
+          const dueDateDetail = detail.find((item) => Array.isArray(item.loc) ? item.loc.includes('due_date') : String(item.loc).includes('due_date'));
+          const tagDetail = detail.find((item) => Array.isArray(item.loc) ? item.loc.includes('tags') : String(item.loc).includes('tags'));
+
+          if (titleDetail) {
+            setFieldError(titleErrorEl, (titleDetail.msg || '').replace(/^Value error, /i, '').replace(/^Validation error, /i, ''));
+          }
+          if (dueDateDetail) {
+            setFieldError(dueDateErrorEl, (dueDateDetail.msg || '').replace(/^Value error, /i, '').replace(/^Validation error, /i, ''));
+          }
+          if (tagDetail) {
+            setFieldError(taskTagsErrorEl, (tagDetail.msg || '').replace(/^Value error, /i, '').replace(/^Validation error, /i, ''));
+          }
+          if (!titleDetail && !dueDateDetail && !tagDetail) {
+            setModalError(body?.message || 'Validation failed');
+          }
           return;
         }
 
@@ -432,6 +805,10 @@
           chipAssignee.className = 'chip assignee';
           chipAssignee.textContent = task.assignee || 'Unassigned';
 
+          const chipOverdue = document.createElement('span');
+          chipOverdue.className = 'chip overdue';
+          chipOverdue.textContent = 'Overdue';
+
           const editBtn = document.createElement('button');
           editBtn.className = 'edit-btn';
           editBtn.setAttribute('aria-label', `Edit task ${task.title || ''}`);
@@ -451,12 +828,33 @@
 
           meta.appendChild(chipPriority);
           meta.appendChild(chipAssignee);
+          if (task.overdue && task.status !== 'Done') {
+            meta.appendChild(chipOverdue);
+          }
           meta.appendChild(editBtn);
           meta.appendChild(deleteBtn);
 
           article.appendChild(title);
           article.appendChild(desc);
-          article.appendChild(meta);
+
+          const footer = document.createElement('div');
+          footer.className = 'card-footer';
+          footer.appendChild(meta);
+
+          const taskTags = Array.isArray(task.tags) ? task.tags : [];
+          if (taskTags.length) {
+            const tagsRow = document.createElement('div');
+            tagsRow.className = 'task-tags';
+            taskTags.forEach((tag) => {
+              const tagChip = document.createElement('span');
+              tagChip.className = 'chip';
+              tagChip.textContent = tag;
+              tagsRow.appendChild(tagChip);
+            });
+            footer.appendChild(tagsRow);
+          }
+
+          article.appendChild(footer);
 
           list.appendChild(article);
         });
@@ -579,6 +977,8 @@
       taskModal = document.getElementById('task-modal');
       taskForm = document.getElementById('task-form');
       newTaskBtn = document.getElementById('new-task-btn');
+      taskFilterSelect = document.getElementById('task-filter');
+      tagFilterSelect = document.getElementById('tag-filter');
       modalTitleEl = document.getElementById('modal-title');
       taskIdInput = document.getElementById('task-id');
       titleInput = document.getElementById('task-title');
@@ -586,10 +986,45 @@
       statusInput = document.getElementById('task-status');
       priorityInput = document.getElementById('task-priority');
       assigneeInput = document.getElementById('task-assignee');
+      dueDateInput = document.getElementById('task-due-date');
+      taskTagsInput = document.getElementById('task-tags-input');
+      taskTagsSuggestionsEl = document.getElementById('task-tags-suggestions');
+      taskTagsChipRowEl = document.getElementById('task-tags-chip-row');
+      taskTagsErrorEl = document.getElementById('task-tags-error');
       formErrorEl = document.getElementById('task-form-error');
       titleErrorEl = document.getElementById('task-title-error');
+      dueDateErrorEl = document.getElementById('task-due-date-error');
 
       if (newTaskBtn) newTaskBtn.addEventListener('click', () => openModal('create'));
+      if (taskFilterSelect) {
+        taskFilterSelect.addEventListener('change', () => {
+          const value = taskFilterSelect.value;
+          currentOverdueFilter = value === 'overdue' ? true : value === 'non-overdue' ? false : null;
+          fetchTasks();
+        });
+      }
+      if (tagFilterSelect) {
+        tagFilterSelect.addEventListener('change', () => {
+          currentTagFilter = tagFilterSelect.value || '';
+          fetchTasks();
+        });
+      }
+      if (taskTagsInput) {
+        taskTagsInput.addEventListener('input', () => {
+          fetchTagSuggestions(taskTagsInput.value);
+        });
+        taskTagsInput.addEventListener('focus', () => {
+          fetchTagSuggestions(taskTagsInput.value);
+        });
+        taskTagsInput.addEventListener('keydown', (event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            addSelectedTag(taskTagsInput.value);
+            if (taskTagsInput) taskTagsInput.value = '';
+            renderTagSuggestions([]);
+          }
+        });
+      }
       if (taskForm) taskForm.addEventListener('submit', submitTaskForm);
       document.addEventListener('click', handleDocumentClick);
       document.addEventListener('keydown', (event) => {
@@ -597,6 +1032,7 @@
           closeModal();
         }
       });
+      loadTagFilterOptions();
       fetchTasks();
     });
   </script>
@@ -639,6 +1075,18 @@
         <div class="form-group">
           <label for="task-assignee">Assignee</label>
           <input id="task-assignee" name="assignee" type="text" autocomplete="off" />
+        </div>
+        <div class="form-group">
+          <label for="task-tags-input">Tags</label>
+          <input id="task-tags-input" name="tagsInput" type="text" autocomplete="off" placeholder="Type a tag and press Enter" />
+          <div id="task-tags-suggestions" class="tag-suggestions hidden"></div>
+          <div id="task-tags-chip-row" class="tag-chip-row"></div>
+          <div id="task-tags-error" class="field-error"></div>
+        </div>
+        <div class="form-group">
+          <label for="task-due-date">Due Date</label>
+          <input id="task-due-date" name="due_date" type="date" autocomplete="off" />
+          <div id="task-due-date-error" class="field-error"></div>
         </div>
         <div class="form-actions">
           <button type="button" class="edit-btn" data-modal-close>Cancel</button>

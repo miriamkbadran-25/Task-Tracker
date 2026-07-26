@@ -1,0 +1,5 @@
+Simple Local Storage Architecture
+
+This mini-ADR extends the existing lightweight FastAPI application by keeping the new features simple and local. Tasks continue to be stored using in-memory data structures, with optional JSON persistence, while new fields such as due_date and tags are added to the task model. Due date validation is handled through Pydantic to prevent past dates, and overdue status is calculated dynamically based on the due date and task status. Tag management is implemented by storing task tags directly with each task, allowing filtering by tag and providing suggestions by searching existing stored tags. This approach keeps the implementation straightforward while supporting all new requirements without introducing additional database complexity.
+
+AI also suggested SQLite that needs slightly more setup and querying.

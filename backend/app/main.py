@@ -2,13 +2,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import UUID
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from app import storage
 from app.business_rules import validate_status_transition
-from app.models import TaskCreate, TaskResponse, TaskUpdate
+from app.models import TaskCreate, TaskPriority, TaskResponse, TaskStatus, TaskUpdate
 
 app = FastAPI(
     title="Task Tracker API",
@@ -50,8 +50,31 @@ def create_task(payload: TaskCreate) -> TaskResponse:
 
 
 @app.get("/tasks", response_model=list[TaskResponse], tags=["tasks"])
-def list_tasks() -> list[TaskResponse]:
-    return storage.get_all_tasks()
+def list_tasks(
+    status: TaskStatus | None = None,
+    priority: TaskPriority | None = None,
+    overdue: bool | None = None,
+    tag: str | None = None,
+) -> list[TaskResponse]:
+    return storage.get_all_tasks(status=status, priority=priority, overdue=overdue, tag=tag)
+
+
+@app.get("/tags/suggestions", response_model=list[str], tags=["tags"])
+def get_tag_suggestions(q: str = Query(...)) -> list[str]:
+    query = q.strip().casefold()
+
+    tags: list[str] = []
+    seen: set[str] = set()
+    for task in storage._tasks.values():
+        for tag in task.tags:
+            normalized_tag = tag.casefold()
+            if normalized_tag in seen:
+                continue
+            if not query or query in normalized_tag:
+                tags.append(tag)
+                seen.add(normalized_tag)
+
+    return tags
 
 
 @app.get("/tasks/{task_id}", response_model=TaskResponse, tags=["tasks"])
