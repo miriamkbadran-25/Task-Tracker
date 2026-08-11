@@ -58,13 +58,9 @@ def _normalize_tags(value: Optional[list[str]]) -> list[str]:
         if MAX_TAG_LENGTH is not None and len(cleaned_tag) > MAX_TAG_LENGTH:
             raise ValueError(f"Tag must not exceed {MAX_TAG_LENGTH} characters")
 
-        normalized_tag = _to_camel_case_tag(cleaned_tag)
-        if not normalized_tag:
-            raise ValueError("Tags cannot contain empty values")
-
-        if any(existing.casefold() == normalized_tag.casefold() for existing in normalized_tags):
+        if any(existing.casefold() == cleaned_tag.casefold() for existing in normalized_tags):
             continue
-        normalized_tags.append(normalized_tag)
+        normalized_tags.append(cleaned_tag)
 
     if MAX_TAGS_PER_TASK is not None and len(normalized_tags) > MAX_TAGS_PER_TASK:
         raise ValueError(f"Tasks cannot have more than {MAX_TAGS_PER_TASK} tags")

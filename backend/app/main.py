@@ -94,13 +94,11 @@ def delete_task(task_id: UUID) -> None:
 
 @app.patch("/tasks/{task_id}", response_model=TaskResponse, tags=["tasks"])
 def update_task(task_id: UUID, payload: TaskUpdate) -> TaskResponse:
-    # If a new status is provided, validate the transition only when it changes
     if payload.status is not None:
         existing = storage.get_task_by_id(str(task_id))
         if existing is None:
             raise HTTPException(status_code=404, detail=f"Task with id {task_id} not found")
-        if payload.status != existing.status:
-            validate_status_transition(existing.status, payload.status)
+        validate_status_transition(existing.status, payload.status)
 
     task = storage.update_task(str(task_id), payload)
     if task is None:
