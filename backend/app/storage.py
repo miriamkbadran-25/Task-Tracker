@@ -91,18 +91,14 @@ def update_task(task_id: str, payload: TaskUpdate) -> Optional[TaskResponse]:
 
     This function uses setattr() to apply updates field-by-field, and
     Pydantic v2 does not re-validate a model's fields on attribute
-    assignment by default. TaskUpdate.title now rejects an explicit
-    null at the model layer (see TaskUpdate.validate_title), which
-    closes off one instance of that gap: {"title": null} is rejected
-    with 422 before reaching this function.
-
-    [VERIFY]: description, status, and priority have the same shape
-    of gap and are not yet fixed — each is Optional in TaskUpdate with
-    no validator rejecting None, but non-nullable in TaskResponse's
-    schema. Not verified by testing whether {"description": null},
-    {"status": null}, or {"priority": null} currently produce the same
-    kind of schema-violating response that title did; flagging by
-    analogy rather than asserting confirmed behavior.
+    assignment by default. TaskUpdate.title, .description, .priority,
+    and .status all now reject an explicit null at the model layer
+    (see their respective validators), which closes that gap for every
+    field except assignee, which is genuinely nullable in
+    TaskResponse's schema and needs no such guard. Confirmed by manual
+    testing: {"title": null}, {"description": null}, {"priority":
+    null}, and {"status": null} are each rejected with 422 before
+    reaching this function.
     """
     if task_id not in _tasks:
         return None

@@ -105,6 +105,111 @@ class TaskUpdate(BaseModel):
             raise ValueError("Title must not exceed 200 characters")
         return v
 
+    @field_validator("description", mode="before")
+    @classmethod
+    def validate_description(cls, v: Optional[str]) -> str:
+        """Reject an explicit null description before type coercion.
+
+        Pydantic only invokes this validator when the ``description``
+        key is present in the input; an omitted key skips it entirely
+        and keeps the field's default of ``None``, same as title.
+
+        Args:
+            v (Optional[str]): The raw description value supplied by
+                the caller. Only called when the ``description`` key is
+                present in the request body.
+
+        Returns:
+            str: ``v`` unchanged. Unlike title, this does not strip
+            whitespace or enforce a length limit, since
+            TaskCreate.description has no such rules either — it only
+            requires a str, defaulting to ``""``. This validator closes
+            the null-bypass gap without inventing constraints
+            TaskCreate doesn't already have.
+
+        Raises:
+            ValueError: If ``v`` is None (i.e. the caller explicitly
+                sent ``{"description": null}``). storage.update_task
+                applies updates via setattr() without re-validating, so
+                an explicit null would otherwise be stored and returned
+                as ``"description": null`` even though
+                TaskResponse.description is a required, non-nullable
+                str (confirmed by manual testing before this fix).
+        """
+        if v is None:
+            raise ValueError("Description cannot be null")
+        return v
+
+    @field_validator("priority", mode="before")
+    @classmethod
+    def validate_priority(cls, v: Optional[TaskPriority]) -> TaskPriority:
+        """Reject an explicit null priority before enum coercion.
+
+        Pydantic only invokes this validator when the ``priority`` key
+        is present in the input; an omitted key skips it entirely and
+        keeps the field's default of ``None``.
+
+        Args:
+            v (Optional[TaskPriority]): The raw priority value supplied
+                by the caller. Only called when the ``priority`` key is
+                present in the request body.
+
+        Returns:
+            TaskPriority: ``v`` unchanged, still subject to Pydantic's
+            normal enum-membership validation afterward.
+
+        Raises:
+            ValueError: If ``v`` is None (i.e. the caller explicitly
+                sent ``{"priority": null}``). storage.update_task
+                applies updates via setattr() without re-validating, so
+                an explicit null would otherwise be stored and returned
+                as ``"priority": null`` even though
+                TaskResponse.priority is a required, non-nullable enum
+                (confirmed by manual testing before this fix).
+        """
+        if v is None:
+            raise ValueError("Priority cannot be null")
+        return v
+
+    @field_validator("status", mode="before")
+    @classmethod
+    def validate_status(cls, v: Optional[TaskStatus]) -> TaskStatus:
+        """Reject an explicit null status before enum coercion.
+
+        Pydantic only invokes this validator when the ``status`` key is
+        present in the input; an omitted key skips it entirely and
+        keeps the field's default of ``None``. This distinction matters
+        more here than for the other fields: main.update_task checks
+        ``payload.status is not None`` to decide whether a status
+        change was requested at all, and only omission should mean
+        "leave status unchanged" — an explicit null is a malformed
+        request, not a no-op.
+
+        Args:
+            v (Optional[TaskStatus]): The raw status value supplied by
+                the caller. Only called when the ``status`` key is
+                present in the request body.
+
+        Returns:
+            TaskStatus: ``v`` unchanged, still subject to Pydantic's
+            normal enum-membership validation afterward.
+
+        Raises:
+            ValueError: If ``v`` is None (i.e. the caller explicitly
+                sent ``{"status": null}``). Before this fix,
+                storage.update_task's setattr()-based apply would store
+                and return ``"status": null`` (a schema violation,
+                since TaskResponse.status is required and non-nullable)
+                and, worse, would silently skip
+                business_rules.validate_status_transition entirely,
+                since main.update_task's ``is not None`` guard treated
+                an explicit null the same as "no status provided"
+                (confirmed by manual testing before this fix).
+        """
+        if v is None:
+            raise ValueError("Status cannot be null. Omit the field entirely to leave status unchanged.")
+        return v
+
 
 class TaskResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
