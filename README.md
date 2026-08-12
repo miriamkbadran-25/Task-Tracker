@@ -180,8 +180,11 @@ despite the empty `services.py` stub suggesting one was planned.
 
 - `BEHAVIOR_CONTRACT_MODULE3.md` — manual behavior-testing checklist
   for the frontend Kanban board (drag-and-drop, modals, error states).
-- No `docs/decisions` directory or ADR file exists in this repository
-  today. `[VERIFY]`: both this file's previous version and
-  `backend/README.md` reference an "ADR-001" architecture decision
-  record that could not be located — confirm whether it exists
-  outside this repo or should be recreated.
+- [`docs/decisions/0001-documentation-verification-approach.md`](docs/decisions/0001-documentation-verification-approach.md)
+  — technical decision note on verifying API documentation against a
+  running instance instead of from source reading alone.
+- `[VERIFY]`: this file's previous version and `backend/README.md`
+  both reference an "ADR-001" architecture decision record that could
+  not be located anywhere in this repository — confirm whether it
+  exists outside this repo or should be recreated. It is a different
+  document from the decision note linked above.
