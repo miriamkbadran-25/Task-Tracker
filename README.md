@@ -1,33 +1,187 @@
 # Task Tracker
 
-A learning project implementing a simple REST API backend (FastAPI)
-with a separate frontend, following a layered architecture with
-in-memory storage.
+A learning project (AI-Assisted Coding, Module 4) implementing a REST
+API backend (FastAPI) with a single-page frontend, backed by
+in-memory storage. Tasks have a title, description, status, priority,
+and optional assignee; status changes are restricted to a fixed set
+of allowed transitions.
 
-## Status
+This is a learning-project skeleton: no authentication, no database,
+no multi-user support, and no deployment configuration beyond the
+included `Dockerfile`. See [Project conventions and current
+limitations](#project-conventions-and-current-limitations) below.
 
-This repository currently contains the **backend skeleton only**
-(health check endpoint). CRUD functionality, task status rules, and
-the frontend will be added in subsequent tasks.
+## Prerequisites
 
-## Architecture
+- Python 3.11 (`[VERIFY]`: `backend/README.md` states 3.12, but
+  `Dockerfile` and `.github/workflows/ci.yml` both pin 3.11 — this
+  README follows the enforced version)
+- pip
+- Docker (optional, only needed for the "Run with Docker" section)
 
-See `ADR-001` (Use a Simple Layered FastAPI Architecture with
-In-Memory Storage) for the full architecture decision, including:
+## Local setup
 
-- Layered structure: Routes → Service → Storage → In-memory data store
-- Task model: title, description, status, priority, assignee
-- Status transition rules (ToDo ↔ InProgress → Done, no reverse from Done)
-- Explicit out-of-scope items: authentication, user accounts,
-  multi-tenancy, real-time updates, mobile apps
+Run from the repository root:
 
-## Structure
+```bash
+cd backend
+python -m venv venv
+```
+
+Activate the virtual environment:
+
+```bash
+# Windows (Git Bash)
+source venv/Scripts/activate
+# macOS/Linux
+source venv/bin/activate
+```
+
+Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+`[VERIFY]`: `backend/.env.example` defines `PORT` and `APP_ENV`, but
+no code in `backend/app/` reads environment variables (no `dotenv`,
+`os.environ`, or `getenv` calls found), so copying it to `.env` has
+no observed effect today.
+
+## Run the app locally
+
+From the repository root:
+
+```bash
+cd backend
+uvicorn app.main:app --reload --port 8000
+```
+
+- API base URL: `http://127.0.0.1:8000`
+- Interactive API docs (Swagger UI): `http://127.0.0.1:8000/docs`
+- Frontend (Kanban board, served by the backend): `http://127.0.0.1:8000/`
+- Health check: `http://127.0.0.1:8000/health`
+
+## Run tests
+
+From the repository root:
+
+```bash
+cd backend
+pytest -v
+```
+
+This matches the command CI runs (`.github/workflows/ci.yml`).
+
+## Run with Docker
+
+The `Dockerfile` lives at the repository root and builds the backend
+plus frontend into a single image. Build and run from the repository
+root:
+
+```bash
+docker build -t task-tracker .
+docker run --rm -p 8000:8000 task-tracker
+```
+
+The container's entrypoint runs
+`uvicorn app.main:app --host 0.0.0.0 --port 8000` (no `--reload`,
+unlike local dev). Once running, the app is available at the same
+URLs listed above (`http://127.0.0.1:8000/`, `/docs`, `/health`).
+
+## CI workflow summary
+
+Defined in `.github/workflows/ci.yml`:
+
+- Triggers: every `push` and every `pull_request` (no branch filters)
+- Runs on `ubuntu-latest`, working directory `backend/`
+- Sets up Python 3.11
+- Installs `backend/requirements.txt` plus an explicit `pytest`
+  (redundant today since `pytest` is already pinned in
+  `requirements.txt`)
+- Runs `pytest -v`
+
+CI only runs the test suite — there is no linting, type-checking,
+Docker build/push, or deployment step defined.
+
+## Project structure
+
+```
 task-tracker/
-├── backend/ # FastAPI REST API (see backend/README.md)
-├── frontend/ # Vanilla HTML/CSS/JS (added later)
-└── README.md
+├── .github/
+│   └── workflows/
+│       └── ci.yml            # CI: installs deps, runs pytest -v
+├── backend/
+│   ├── app/
+│   │   ├── main.py           # FastAPI app instance + all route handlers
+│   │   ├── models.py         # Pydantic models: TaskCreate, TaskUpdate,
+│   │   │                     # TaskResponse, TaskStatus, TaskPriority
+│   │   ├── storage.py        # In-memory task store (module-level dict)
+│   │   ├── business_rules.py # Status transition validation
+│   │   ├── routes.py         # empty, unused
+│   │   ├── schemas.py        # empty, unused
+│   │   ├── services.py       # empty, unused
+│   │   └── validators.py     # empty, unused
+│   ├── tests/
+│   │   ├── test_frontend_integration.py
+│   │   ├── verify_a.py
+│   │   └── __init__.py
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── README.md             # older, backend-only setup doc — see note below
+├── frontend/
+│   └── index.html            # single-file Kanban board UI (HTML/CSS/JS)
+├── Dockerfile
+├── .dockerignore
+├── BEHAVIOR_CONTRACT_MODULE3.md  # manual frontend behavior test checklist
+└── README.md                 # this file
+```
 
-## Getting Started
+`[VERIFY]`: `backend/app/routes.py`, `schemas.py`, `services.py`, and
+`validators.py` are all empty and not imported anywhere — confirmed
+by grep. `main.py` calls `storage.py` and `business_rules.py`
+directly; there is currently no separate service layer in use,
+despite the empty `services.py` stub suggesting one was planned.
 
-See [`backend/README.md`](backend/README.md) for setup, run, and test
-instructions.
+## Project conventions and current limitations
+
+**Conventions**
+
+- All request/response models use Pydantic v2 with `extra="forbid"`
+  — unknown fields in a request body are rejected.
+- Task `status` values are exactly `ToDo`, `InProgress`, `Done`
+  (`app/models.py: TaskStatus`); `priority` values are `Low`,
+  `Medium`, `High`.
+- Allowed status transitions (`app/business_rules.py:
+  VALID_TRANSITIONS`): `ToDo → InProgress`, `InProgress → Done`,
+  `Done → InProgress`. Any other transition, including submitting the
+  same status a task already has, is rejected by
+  `validate_status_transition` with HTTP 422 — **except** that
+  `PATCH /tasks/{task_id}` only calls this validator when the
+  requested status differs from the task's current status, so
+  submitting an unchanged status is accepted with 200 rather than
+  hitting that rule.
+
+**Current limitations**
+
+- In-memory storage only — all tasks are lost on process restart;
+  there is no database.
+- No authentication, authorization, or user accounts.
+- No multi-tenancy and no real-time updates (no websockets/polling).
+- `GET /tasks` does not support filtering by status or priority via
+  query parameters, even though `storage.get_all_tasks()` accepts
+  both — the route calls it with no arguments. `[VERIFY]` whether
+  this is intentional.
+- Not production-ready: the `Dockerfile` builds a runnable image, but
+  nothing in this repo deploys it anywhere.
+- CI runs tests only; there is no linting or type-checking step.
+
+## Related documents
+
+- `BEHAVIOR_CONTRACT_MODULE3.md` — manual behavior-testing checklist
+  for the frontend Kanban board (drag-and-drop, modals, error states).
+- No `docs/decisions` directory or ADR file exists in this repository
+  today. `[VERIFY]`: both this file's previous version and
+  `backend/README.md` reference an "ADR-001" architecture decision
+  record that could not be located — confirm whether it exists
+  outside this repo or should be recreated.
