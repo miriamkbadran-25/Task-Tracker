@@ -131,6 +131,10 @@ def get_task(task_id: UUID) -> TaskResponse:
         TaskResponse: The matching task.
 
     Raises:
+        HTTPException: 422 if ``task_id`` is not a syntactically valid
+            UUID. Raised by FastAPI's path-parameter validation before
+            this function's body runs, not by code in this function.
+            Confirmed via manual testing.
         HTTPException: 404 if no task with ``task_id`` exists.
 
     Example:
@@ -156,6 +160,10 @@ def delete_task(task_id: UUID) -> None:
         None: Responds with HTTP 204 No Content on success.
 
     Raises:
+        HTTPException: 422 if ``task_id`` is not a syntactically valid
+            UUID. Raised by FastAPI's path-parameter validation before
+            this function's body runs, not by code in this function.
+            Confirmed via manual testing.
         HTTPException: 404 if no task with ``task_id`` exists.
 
     Example:
@@ -186,6 +194,10 @@ def update_task(task_id: UUID, payload: TaskUpdate) -> TaskResponse:
         TaskResponse: The updated task.
 
     Raises:
+        HTTPException: 422 if ``task_id`` is not a syntactically valid
+            UUID. Raised by FastAPI's path-parameter validation before
+            this function's body runs, not by code in this function.
+            Confirmed via manual testing.
         HTTPException: 404 if no task with ``task_id`` exists.
         HTTPException: 422 if ``status`` is provided, differs from the
             current status, and the transition is not allowed (see

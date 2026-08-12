@@ -80,12 +80,15 @@ class TaskUpdate(BaseModel):
                 characters. Pydantic converts this into a 422 response
                 when triggered via a FastAPI request body.
 
-        [VERIFY]: This validator does not distinguish "field omitted"
-        from "field explicitly set to null" — both pass v=None through
-        unchanged. Combined with storage.update_task's
-        exclude_unset=True, an explicit {"title": null} in a PATCH
-        request would be applied and set the stored title to None.
-        Flagging since TaskResponse.title is typed as a required str.
+        Confirmed bug (see storage.update_task): this validator does
+        not distinguish "field omitted" from "field explicitly set to
+        null" — both pass v=None through unchanged. Combined with
+        storage.update_task's use of setattr() (which skips Pydantic
+        re-validation), an explicit {"title": null} in a PATCH request
+        sets the stored title to None and is returned as such with
+        HTTP 200, even though TaskResponse.title is a required,
+        non-nullable str. Verified by manual testing, not just code
+        inspection.
         """
         if v is None:
             return v

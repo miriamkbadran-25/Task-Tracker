@@ -89,11 +89,16 @@ def update_task(task_id: str, payload: TaskUpdate) -> Optional[TaskResponse]:
         with ``task_id`` exists. On success, ``updated_at`` is refreshed
         to the current local time.
 
-    [VERIFY]: TaskUpdate.title accepts an explicit null and would set
-    the task's title to None if a caller sent {"title": null}, even
-    though TaskResponse.title is typed as a non-optional str. Whether
-    that's intended, or should be rejected earlier, wasn't clear from
-    the code.
+    Confirmed bug (verified by manual testing, not just code
+    inspection): TaskUpdate.title accepts an explicit null, and
+    PATCH {"title": null} sets the stored title to None and is
+    returned as "title": null with HTTP 200 — even though
+    TaskResponse.title is declared as a required, non-nullable str in
+    the OpenAPI schema. This happens because this function uses
+    setattr() to apply updates, and Pydantic v2 does not re-validate
+    a model's fields on attribute assignment by default. Not fixed
+    here, since that would change runtime behavior; needs a decision
+    on whether to reject null titles or enable validate_assignment.
     """
     if task_id not in _tasks:
         return None
