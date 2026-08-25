@@ -4,7 +4,7 @@
 
 - Branch: `final-project` (local workspace)
 - Date: 25 August 2026
-- Local app run command: `cd backend; uvicorn app.main:app --reload --port 8000` (not run directly; the same app was verified through Docker Compose).
+- Local app run command: `cd backend; uvicorn app.main:app --reload --port 8000`.
 - /health result: `docker compose up --build --detach --wait` reported the service `healthy`; `GET http://127.0.0.1:8000/health` returned HTTP 200 with `{"status":"ok", ...}`. The verification stack was removed with `docker compose down`.
 - Frontend check: `test_root_serves_frontend_html` passed, confirming that `GET /` serves the expected HTML. Manual browser verification confirmed that the Kanban board is visible and that a task can be created and edited through the frontend.
 - Test command: `cd backend; .\\.venv\\Scripts\\python.exe -m pytest -v`
