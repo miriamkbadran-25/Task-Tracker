@@ -38,3 +38,15 @@ AI-Assisted Coding - Module 5 Prompt Library
 - My one rule is: use ai as a tool not a replacement for me.
 
 I will re-read this document in 30 days.
+
+## Decision Card
+
+| Situation | My first move |
+|---|---|
+| New feature | Ask AI for a small plan, edge cases, and test ideas; I decide the product scope before code is written. |
+| Code review | Ask for file-specific findings, then inspect the diff and label each finding useful, noise, or wrong. |
+| Debugging | Use AI for hypotheses and focused diagnostic commands, then reproduce the issue before changing code. |
+| Infrastructure | Use AI to explain CI/Docker options, then run the exact commands and inspect the resulting configuration. |
+| Never paste | Credentials, API keys, `.env` values, private user data, or production logs. |
+
+**One rule:** If I cannot explain a change and verify it with repository evidence, I do not submit it.

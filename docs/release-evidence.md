@@ -6,14 +6,14 @@
 - Date: 25 August 2026
 - Local app run command: `cd backend; uvicorn app.main:app --reload --port 8000` (not run directly; the same app was verified through Docker Compose).
 - /health result: `docker compose up --build --detach --wait` reported the service `healthy`; `GET http://127.0.0.1:8000/health` returned HTTP 200 with `{"status":"ok", ...}`. The verification stack was removed with `docker compose down`.
-- Frontend check: `test_root_serves_frontend_html` passed, confirming that `GET /` serves the expected HTML. Browser interaction was not run.
+- Frontend check: `test_root_serves_frontend_html` passed, confirming that `GET /` serves the expected HTML. A browser check of the Kanban board and create/edit flow is **not confirmed** in this evidence record.
 - Test command: `cd backend; .\\.venv\\Scripts\\python.exe -m pytest -v`
 - Test result: Python 3.11.9; all 3 tests passed. `python -m pip check` reported no broken requirements.
 
 ## CI evidence
 
 - Workflow file: `.github/workflows/ci.yml` — AI-Assisted Coding - Final Course Project Brief
-- Latest run link or note: **Not confirmed** during this workspace review; no CI run was queried.
+- Latest green run: [CI run #11 for `b1a9188`](https://github.com/miriamkbadran-25/Task-Tracker/actions/runs/32878067301) completed successfully on 25 August 2026.
 - Test command used by CI: `python -m pytest -v` from the `backend/` working directory, after installing `requirements.txt` on Python 3.11.
 - Shortcut check: Passed by workflow review. No `continue-on-error`, `|| true`, or pytest skip condition is present.
 
