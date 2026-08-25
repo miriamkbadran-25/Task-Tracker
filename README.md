@@ -100,6 +100,24 @@ URLs listed above (`http://127.0.0.1:8000/`, `/docs`, `/health`).
   and their secrets are not sent in the Docker build context.
 - Runtime command: `docker run --rm -p 8000:8000 task-tracker`.
 
+### Run with Docker Compose
+
+For the standard local container setup, Docker Compose builds the
+image, publishes port 8000, and checks `/health` until the app is
+ready:
+
+```bash
+docker compose up --build
+```
+
+Open `http://127.0.0.1:8000/` after the health check reports
+`healthy`. Stop the stack with `Ctrl+C`, then remove its resources
+when finished:
+
+```bash
+docker compose down
+```
+
 ## CI workflow summary
 
 Defined in `.github/workflows/ci.yml`:
@@ -215,3 +233,81 @@ despite the empty `services.py` stub suggesting one was planned.
   not be located anywhere in this repository — confirm whether it
   exists outside this repo or should be recreated. It is a different
   document from the decision note linked above.
+
+## Final Project
+
+Branch reviewed: `final-project`
+
+### What this submission demonstrates
+
+- The existing Task Tracker application runs within the intended course scope: a FastAPI backend with a single-page Kanban frontend and in-memory task storage.
+- GitHub Actions runs the pytest suite on both `push` and `pull_request`.
+- The Docker image builds and starts the application on port 8000; `/health` returns HTTP 200.
+- AI review, security review, release evidence, and ownership documentation are included in `docs/`.
+
+### How to run locally
+
+From the repository root:
+
+```bash
+cd backend
+python -m venv .venv
+```
+
+Activate the virtual environment:
+
+```bash
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# macOS/Linux
+source .venv/bin/activate
+```
+
+Install dependencies and start the app:
+
+```bash
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+Open `http://127.0.0.1:8000/` for the frontend, `http://127.0.0.1:8000/docs` for API documentation, or `http://127.0.0.1:8000/health` for the health check.
+
+### How to run tests
+
+From the repository root:
+
+```bash
+cd backend
+python -m pytest -v
+```
+
+### How to run with Docker
+
+From the repository root:
+
+```bash
+docker build -t task-tracker .
+docker run --rm -p 8000:8000 task-tracker
+```
+
+In a second terminal:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Expected result: HTTP 200 with a JSON response containing `"status": "ok"`.
+
+### Evidence files
+
+- `docs/release-evidence.md`
+- `docs/final-ai-review.md`
+- `docs/ai-playbook.md`
+- `docs/security-review.md`
+
+### AI assistance summary
+
+AI helped draft and review CI, Docker configuration, project documentation in a user-friendly way, and debugging hypotheses. I verified the work through test and source review, a Docker and `/health` check, browser/frontend checks, and a manual review of the final diff.
+
+One AI suggestion I rejected or corrected was treating every dependency advisory as an immediate confirmed vulnerability. I kept the advisory items as unverified until the affected versions, usage, and realistic attack path could be supported by evidence.
