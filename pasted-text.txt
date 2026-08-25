@@ -1,0 +1,215 @@
+AI-Assisted Coding - Final Course Project Brief (Simplified)
+Final Course Project
+AI-Assisted Release Check & Ownership Evidence
+Project scenario
+You are preparing your Task Tracker for a teammate who will maintain it after the course. The teammate should be
+able to clone the repo, run the app locally, run the tests, run the app in Docker, understand the main release
+checks, and see how AI was used responsibly.
+Your final project should answer four questions:
+• Does the existing Task Tracker still work and stay inside the intended scope?
+• Can another developer run the app, tests, CI workflow, and Docker container from the repo instructions?
+• Can you show evidence that AI output was reviewed, graded, corrected, or rejected instead of accepted
+blindly?
+• Can you state the rules you will use when working with AI after the course?
+Starting point and ground rules
+Rule What it means
+Use the same repo Use the public GitHub repository used for the mid-course project and later modules.
+Work on final-project All final work should live on one branch named final-project.
+No new product features Do not implement comments, authentication, production database, notifications, or unrelated UI
+changes.
+Protect app/ and frontend/ Only change app/ or frontend/ for a small bug fix, security fix, or documentation-supported
+correction. Explain any such change in docs/final-ai-review.md.
+No real secrets or personal
+data
+Do not paste credentials, .env values, tokens, production logs, or real personal/customer data into AI
+tools or the repo.
+You own the result If you cannot explain a changed line, command, config choice, or AI suggestion, do not submit it as
+final work.
+Deliverables at a glance
+Area Required evidence What graders check
+Baseline and scope
+control
+README Final Project section; release-evidence
+baseline; final-project branch.
+The app still runs, tests pass or are honestly
+recorded, and no new product feature was added.
+Release readiness .github/workflows/ci.yml, Dockerfile, .dockerignore,
+docs/release-evidence.md.
+CI runs pytest, Docker builds/runs, /health is
+verified, and dangerous shortcuts are not used.
+AI review and security AGENTS.md and docs/final-ai-review.md. AI comments/findings are graded with reasons, file
+AI-Assisted Coding - Final Course Project Brief (Simplified)
+Area Required evidence What graders check
+evidence, and at least one human/manual check.
+AI ownership docs/ai-playbook.md plus ownership statement in
+docs/final-ai-review.md.
+Rules are concrete, personal, and backed by actual
+course evidence.
+Submission Public GitHub URL only. No video link, no zip file, and no separate
+screenshots are required unless the LMS asks for
+them.
+Required final repository structure
+Your repo may contain more files, especially if you completed all Module 4 and Module 5 exercises. For the final
+project grade, the minimum required structure is:
+.github/workflows/ci.yml
+Dockerfile
+.dockerignore
+README.md
+AGENTS.md
+app/
+frontend/
+tests/
+docs/
+ release-evidence.md
+ final-ai-review.md
+ ai-playbook.md
+Part A - Baseline app check and README
+Start by proving the current app still works. Do not ask AI to rewrite the project. The first responsibility of the final
+project is to protect what already exists.
+Requirement What to submit
+Final branch All final project work is on a branch named final-project.
+Backend baseline Record the command used to start the API and the result of GET /health.
+Frontend baseline State how you opened the frontend and one sentence confirming the Kanban board/create-edit
+flow is still visible. No video is required.
+Test baseline Run the full pytest suite and record the exact command and result. If tests fail, record the failing
+test names and whether the failure is pre-existing or introduced by final work.
+README Final Project section Add branch name, local run command, Docker run command, test command, evidence files, and a
+short AI-assistance summary.
+Part B - Release readiness evidence
+Save all evidence for this part in docs/release-evidence.md. Keep it factual and short. Text logs are enough;
+screenshots are optional.
+B1. Continuous Integration
+• Create or finalize .github/workflows/ci.yml so pytest runs on push and pull request.
+• Record the latest green GitHub Actions run link or a short note that the workflow ran successfully.
+AI-Assisted Coding - Final Course Project Brief (Simplified)
+• Check for dangerous shortcuts: continue-on-error, || true, skipped pytest command, vague Python version, or
+missing dependency installation.
+• Intentional red-run evidence is optional for the final project. Include it only if you already produced it during
+Module 4.
+B2. Docker and runtime verification
+• Create or finalize Dockerfile and .dockerignore.
+• Build and run the image locally.
+• Verify the container responds to /health with HTTP 200.
+• Record a short Docker safety check: non-root user if implemented, no .env/secrets copied, and a clear runtime
+command.
+B3. Documentation checked against reality
+• Update README.md with exact setup, run, test, and Docker commands.
+• Check at least three README or AI-generated documentation claims against the actual repo or running app.
+• At least one checked claim should involve a command, endpoint, schema/status code, Docker behavior, or CI
+behavior.
+Part C - Final AI review and security evidence
+Save this part in docs/final-ai-review.md. This is the main AI Assisted Coding evidence document. It should be
+short enough to grade quickly but specific enough to show judgment.
+Section Minimum requirement
+AGENTS.md guardrails Confirm AGENTS.md exists and includes stack, run/test commands, project rules, and docsfirst/read-first guardrails.
+AI code review mini-log Choose one real diff or changed file. Record at least 3 AI review comments and grade each
+Useful, Noise, or Wrong with a reason.
+AI security mini-review Run or reuse a read-only security review. Record at least 3 findings with file evidence and
+grade each Valid, False Positive, or Noise.
+Manual check Add one human check that did not simply copy the AI output. This may be a manual finding or
+a note that you checked a specific risk and found nothing new.
+Rejected or corrected AI output Describe one AI suggestion you rejected, corrected, downgraded, or refused to apply.
+Ownership statement Write 3-5 sentences explaining why you are comfortable submitting this repo as your own
+work.
+What counts as good evidence?
+Good evidence names real files, real commands, real test results, real grades, and real decisions. Weak evidence
+says only “AI helped” or “I checked it” without saying what was checked.
+Part D - Personal AI playbook
+Save or update docs/ai-playbook.md. This may be the same playbook you created in Module 5, revised after
+finishing the final project.
+Required section What graders look for
+When I reach for AI first Specific task shapes where AI helped you during the course.
+When I do not reach for AI first Situations where risk, missing context, or learning goals should slow you down.
+My non-negotiables Rules around secrets, data, review, verification, and ownership.
+My review rules How you inspect diffs, run commands, grade findings, and reject bad suggestions.
+What I am still figuring out Honest open questions about tool choice or team norms.
+Decision Card New feature, code review, debugging, infrastructure, never-paste, and one rule.
+AI-Assisted Coding - Final Course Project Brief (Simplified)
+Keep the playbook to one page. It should sound like you, not like a vendor policy or generic AI safety statement.
+Recommended workflow for students
+1. Create and push the final-project branch.
+2. Run the app and tests before final edits. Record the baseline in docs/release-evidence.md.
+3. Finish or clean up CI, Docker, and README.
+4. Complete docs/release-evidence.md using the template below.
+5. Create or refine AGENTS.md with repo-specific guardrails.
+6. Run a small AI code review and security review, then complete docs/final-ai-review.md.
+7. Revise docs/ai-playbook.md after the final evidence exists.
+8. Check the quick grading checklist, then submit the GitHub URL.
+README Final Project section template
+## Final Project
+Branch reviewed: final-project
+### What this submission demonstrates
+- Existing Task Tracker app still runs inside the intended course scope.
+- CI runs the pytest suite on push and/or pull request.
+- Docker image builds and runs with /health returning 200.
+- AI review, security, and ownership evidence is in docs/.
+### How to run locally
+[paste exact setup and run commands]
+### How to run tests
+[paste exact test command]
+### How to run with Docker
+[paste exact build, run, and curl commands]
+### Evidence files
+- docs/release-evidence.md
+- docs/final-ai-review.md
+- docs/ai-playbook.md
+### AI assistance summary
+AI helped draft or review: [CI / Docker / docs / security / debugging].
+I verified the work by: [tests / diff review / Docker / /health / manual scan].
+One AI suggestion I rejected or corrected: [brief note].
+docs/release-evidence.md template
+# Release Evidence
+## Baseline
+- Branch:
+- Date:
+- Local app run command:
+- /health result:
+- Frontend check:
+- Test command:
+- Test result:
+## CI evidence
+- Workflow file:
+AI-Assisted Coding - Final Course Project Brief (Simplified)
+- Latest run link or note:
+- Test command used by CI:
+- Shortcut check: no continue-on-error / no || true / pytest is not skipped.
+## Docker evidence
+- Build command:
+- Run command:
+- /health check:
+- Non-root check, if implemented:
+- No-baked-secrets check:
+## Documentation claim-vs-reality log
+| Claim checked | Evidence used | Result | Change made, if any |
+|---|---|---|---|
+| | | | |
+| | | | |
+| | | | |
+docs/final-ai-review.md template
+# Final AI Review and Ownership Evidence
+## AGENTS.md guardrails
+- Repo-specific stack and commands included: yes/no
+- Docs-first/read-first guardrail included: yes/no
+- Unexpected app/frontend edits rule included: yes/no
+## AI code review mini-log
+| AI comment | Grade: Useful / Noise / Wrong | Reason | Verification or decision |
+|---|---|---|---|
+| | | | |
+| | | | |
+| | | | |
+## AI security mini-review
+| Finding | File evidence | Grade: Valid / False Positive / Noise | Reason | Next action |
+|---|---|---|---|---|
+| | | | | |
+| | | | | |
+| | | | | |
+## Manual security check
+[What I checked myself, what I found, and why it matters.]
+## One AI output I rejected or corrected
+[What AI suggested, why I did not accept it as-is, and what I did instead.]
+## Three AI usage rules
+1. Never paste:
+2. Always verify:
+3. Record AI contributions by:
+## Ownership statement
+[3-5 sentences explaining why I am comfortable submitting this repo as my work.]
