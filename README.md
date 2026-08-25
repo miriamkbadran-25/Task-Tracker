@@ -25,16 +25,20 @@ Run from the repository root:
 
 ```bash
 cd backend
-python -m venv venv
+python -m venv .venv
 ```
 
 Activate the virtual environment:
 
 ```bash
-# Windows (Git Bash)
-source venv/Scripts/activate
-# macOS/Linux
-source venv/bin/activate
+# Windows PowerShell
+.\.venv\Scripts\Activate.ps1
+
+# Windows Command Prompt
+.venv\Scripts\activate.bat
+
+# macOS/Linux (bash/zsh)
+source .venv/bin/activate
 ```
 
 Install dependencies:
@@ -43,10 +47,8 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-`[VERIFY]`: `backend/.env.example` defines `PORT` and `APP_ENV`, but
-no code in `backend/app/` reads environment variables (no `dotenv`,
-`os.environ`, or `getenv` calls found), so copying it to `.env` has
-no observed effect today.
+The application does not require a `.env` file for the commands in
+this README.
 
 ## Run the app locally
 
@@ -90,6 +92,14 @@ The container's entrypoint runs
 unlike local dev). Once running, the app is available at the same
 URLs listed above (`http://127.0.0.1:8000/`, `/docs`, `/health`).
 
+### Docker safety check
+
+- The runtime image switches to the unprivileged `app` user before
+  starting Uvicorn.
+- `.dockerignore` excludes `.env` and `.env.*`, so environment files
+  and their secrets are not sent in the Docker build context.
+- Runtime command: `docker run --rm -p 8000:8000 task-tracker`.
+
 ## CI workflow summary
 
 Defined in `.github/workflows/ci.yml`:
@@ -100,11 +110,26 @@ Defined in `.github/workflows/ci.yml`:
 - Installs `backend/requirements.txt` (which pins `pytest`)
 - Runs `python -m pytest -v`
 
-Latest verified green run: [CI #8](https://github.com/miriamkbadran-25/Task-Tracker/actions/runs/32836222446),
-completed successfully on August 25, 2026.
-
 CI only runs the test suite — there is no linting, type-checking,
 Docker build/push, or deployment step defined.
+
+## Documentation checks
+
+The following claims were checked against the repository on August 25,
+2026. They are source and test-suite checks; a local server and Docker
+container were **not run** during this documentation update because
+this workspace has no working Python interpreter or Docker CLI.
+
+- **Test command and CI behavior:** `.github/workflows/ci.yml` sets
+  `backend/` as the working directory, installs `requirements.txt`,
+  and runs `python -m pytest -v` on Python 3.11.
+- **Frontend and task endpoint:** `backend/app/main.py` serves the
+  frontend from `GET /` and defines `POST /tasks` with HTTP `201
+  Created`; `backend/tests/test_frontend_integration.py` asserts both
+  behaviors.
+- **Docker startup behavior:** `Dockerfile` uses Python 3.11-slim,
+  exposes port 8000, switches to the `app` user, and starts Uvicorn
+  with `app.main:app --host 0.0.0.0 --port 8000`.
 
 ## Project structure
 
