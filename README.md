@@ -13,9 +13,8 @@ limitations](#project-conventions-and-current-limitations) below.
 
 ## Prerequisites
 
-- Python 3.11 (`[VERIFY]`: `backend/README.md` states 3.12, but
-  `Dockerfile` and `.github/workflows/ci.yml` both pin 3.11 — this
-  README follows the enforced version)
+- Python 3.11 (the version pinned by `Dockerfile` and
+  `.github/workflows/ci.yml`)
 - pip
 - Docker (optional, only needed for the "Run with Docker" section)
 
@@ -104,7 +103,7 @@ URLs listed above (`http://127.0.0.1:8000/`, `/docs`, `/health`).
 
 For the standard local container setup, Docker Compose builds the
 image, publishes port 8000, and checks `/health` until the app is
-ready:
+ready. This uses the repository's `compose.yaml`:
 
 ```bash
 docker compose up --build
@@ -131,12 +130,24 @@ Defined in `.github/workflows/ci.yml`:
 CI only runs the test suite — there is no linting, type-checking,
 Docker build/push, or deployment step defined.
 
-## Documentation checks
+## Local verification status
 
-The following claims were checked against the repository on August 25,
-2026. They are source and test-suite checks; a local server and Docker
-container were **not run** during this documentation update because
-this workspace has no working Python interpreter or Docker CLI.
+Verified in this workspace on August 25, 2026:
+
+- **Python environment:** `py -3.11 --version` reported Python 3.11.9.
+  `backend/.venv` passed `python -m pip check` with no broken
+  requirements.
+- **Tests:** `cd backend; .\\.venv\\Scripts\\python.exe -m pytest -v`
+  passed all 3 tests.
+- **Docker and Compose:** Docker Desktop 4.88.1 / Docker Engine 29.7.2
+  rebuilt the Compose image. `docker compose up --build --detach --wait`
+  reported the service healthy, and `GET /health` returned a JSON
+  response with `"status": "ok"`. The verification stack was removed
+  afterward with `docker compose down`.
+- **Runtime image:** `docker image inspect` confirmed the image runs as
+  the unprivileged `app` user and exposes `8000/tcp`.
+
+The following additional claims were checked from repository sources:
 
 - **Test command and CI behavior:** `.github/workflows/ci.yml` sets
   `backend/` as the working directory, installs `requirements.txt`,
@@ -240,9 +251,9 @@ Branch reviewed: `final-project`
 
 ### What this submission demonstrates
 
-- The existing Task Tracker application runs within the intended course scope: a FastAPI backend with a single-page Kanban frontend and in-memory task storage.
+- The repository contains the intended course-scope application: a FastAPI backend with a single-page Kanban frontend and in-memory task storage. Python 3.11.9 ran all 3 automated tests successfully in this workspace on August 25, 2026.
 - GitHub Actions runs the pytest suite on both `push` and `pull_request`.
-- The Docker image builds and starts the application on port 8000; `/health` returns HTTP 200.
+- Docker Compose rebuilt and started the image successfully; its health check passed and `GET /health` returned `{"status": "ok", ...}`.
 - AI review, security review, release evidence, and ownership documentation are included in `docs/`.
 
 ### How to run locally
@@ -308,6 +319,6 @@ Expected result: HTTP 200 with a JSON response containing `"status": "ok"`.
 
 ### AI assistance summary
 
-AI helped draft and review CI, Docker configuration, project documentation in a user-friendly way, and debugging hypotheses. I verified the work through test and source review, a Docker and `/health` check, browser/frontend checks, and a manual review of the final diff.
+AI helped draft and review CI, Docker configuration, project documentation in a user-friendly way, and debugging hypotheses. The August 25, 2026 workspace review reran the Python tests and Docker Compose health check; both passed.
 
 One AI suggestion I rejected or corrected was treating every dependency advisory as an immediate confirmed vulnerability. I kept the advisory items as unverified until the affected versions, usage, and realistic attack path could be supported by evidence.

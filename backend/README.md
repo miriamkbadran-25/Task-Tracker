@@ -1,12 +1,12 @@
 # Task Tracker API — Backend
 
-A minimal FastAPI backend for the Task Tracker learning project. This
-skeleton currently exposes only a health check endpoint; CRUD
-functionality for tasks will be added in a later step.
+A FastAPI backend for the Task Tracker learning project. It serves the
+single-page frontend and provides task creation, listing, retrieval,
+update, and deletion endpoints in addition to the health check.
 
 ## Tech Stack
 
-- Python 3.12
+- Python 3.11 (pinned by the repository Dockerfile and CI workflow)
 - FastAPI
 - Uvicorn (ASGI server)
 - Pydantic
@@ -67,9 +67,40 @@ Expected response:
 Once the server is running, open your browser to:
 http://127.0.0.1:8000/docs
 
+## Running automated tests
+
+From the `backend/` directory, after installing dependencies:
+
+```bash
+python -m pytest -v
+```
+
+Verified in this workspace on August 25, 2026 with Python 3.11.9:
+`backend/.venv` passed `python -m pip check`, and all 3 tests passed.
+
+## Docker
+
+Build and run the full application from the repository root:
+
+```bash
+docker build -t task-tracker .
+docker run --rm -p 8000:8000 task-tracker
+```
+
+`compose.yaml` provides the equivalent Compose setup, including a
+health check:
+
+```bash
+docker compose up --build
+```
+
+Verified in this workspace on August 25, 2026 with Docker Desktop
+4.88.1 / Docker Engine 29.7.2: Compose rebuilt the image, its health
+check reached `healthy`, and `GET /health` returned `{"status": "ok", ...}`.
+
 ## Scope Notes
 
-This skeleton intentionally does **not** include CRUD endpoints,
-authentication, a database, Docker configuration, or a frontend. See
-the project ADR for the full architecture decision and future
-migration path.# Task-Tracker
+The project intentionally does **not** include authentication, a
+database, or multi-user support. It includes Docker configuration and
+a frontend at the repository root; see the root `README.md` for the
+full setup and runtime guidance.

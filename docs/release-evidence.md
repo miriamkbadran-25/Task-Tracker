@@ -4,31 +4,31 @@
 
 - Branch: `final-project` (local workspace)
 - Date: 25 August 2026
-- Local app run command: `cd backend; uvicorn app.main:app --reload --port 8000`
-- /health result: The route is present in `backend/app/main.py` and returns `status: "ok"` with a UTC timestamp.
-- Frontend check: `GET /` returns `frontend/index.html`; `test_root_serves_frontend_html` expects HTTP 200 and the “Task Tracker” page title. Browser check successful.
-- Test command: `cd backend; python -m pytest -v`
-- Test result: Test coverage was reviewed; the suite includes frontend serving plus task creation, listing, and update flows.
+- Local app run command: `cd backend; uvicorn app.main:app --reload --port 8000` (not run directly; the same app was verified through Docker Compose).
+- /health result: `docker compose up --build --detach --wait` reported the service `healthy`; `GET http://127.0.0.1:8000/health` returned HTTP 200 with `{"status":"ok", ...}`. The verification stack was removed with `docker compose down`.
+- Frontend check: `test_root_serves_frontend_html` passed, confirming that `GET /` serves the expected HTML. Browser interaction was not run.
+- Test command: `cd backend; .\\.venv\\Scripts\\python.exe -m pytest -v`
+- Test result: Python 3.11.9; all 3 tests passed. `python -m pip check` reported no broken requirements.
 
 ## CI evidence
 
 - Workflow file: `.github/workflows/ci.yml` — AI-Assisted Coding - Final Course Project Brief
-- Latest run link or note: passing CI result for this revision is confirmed.
+- Latest run link or note: **Not confirmed** during this workspace review; no CI run was queried.
 - Test command used by CI: `python -m pytest -v` from the `backend/` working directory, after installing `requirements.txt` on Python 3.11.
 - Shortcut check: Passed by workflow review. No `continue-on-error`, `|| true`, or pytest skip condition is present.
 
 ## Docker evidence
 
-- Build command: `docker build -t task-tracker .`
-- Run command: `docker run --rm -p 8000:8000 task-tracker`
-- /health check: returns 200. The image command starts Uvicorn on port 8000, and the application defines `GET /health`.
-- Non-root check, if implemented: Implemented and verified by Dockerfile review. The runtime stage creates `app` and switches to `USER app` before starting Uvicorn.
-- No-baked-secrets check: Build-context review passed. `.dockerignore` excludes `.env` and `.env.*`, and the Dockerfile copies only `backend/app` and `frontend` into the runtime image. A built-image inspection was  run.
+- Build/run command: `docker compose up --build --detach --wait`.
+- Result: Docker Desktop 4.88.1 / Docker Engine 29.7.2 rebuilt `task-tracker-task-tracker`, started the service, and reported it healthy.
+- /health check: Passed as described above.
+- Non-root check: `docker image inspect` confirmed `User=app` and `ExposedPorts={"8000/tcp":{}}`.
+- No-baked-secrets check: `.dockerignore` excludes `.env` and `.env.*`, and the Dockerfile copies only `backend/app` and `frontend` into the runtime image. This is a build-context/source review; image-layer secret scanning was not run.
 
 ## Documentation claim-vs-reality log
 
 | Claim checked | Evidence used | Result | Change made, if any |
 |---|---|---|---|
-| The frontend is served by the FastAPI app at `/`. | `backend/app/main.py`; `backend/tests/test_frontend_integration.py` | Confirmed by code and test review; browser-tested. | Recorded the evidence and limitation in this release note. |
-| CI runs the project test suite on Python 3.11. | `.github/workflows/ci.yml`; `backend/requirements.txt` | Confirmed by workflow review. A successful run for the current revision is confirmed. | No workflow change. |
-| The container runs as a non-root user and excludes common environment files from its build context. | `Dockerfile`; `.dockerignore` | Confirmed by source review; runtime image inspection run successfully. | No Dockerfile change. |
+| The frontend is served by the FastAPI app at `/`. | `backend/app/main.py`; `backend/tests/test_frontend_integration.py` | Confirmed by code and a passing automated test; browser interaction was not run. | Recorded the evidence and limitation in this release note. |
+| CI is configured to run the project test suite on Python 3.11. | `.github/workflows/ci.yml`; `backend/requirements.txt` | Confirmed by workflow review. A successful run for the current revision was not independently verified. | No workflow change. |
+| The container runs as a non-root user and excludes common environment files from its build context. | `Dockerfile`; `.dockerignore`; `docker image inspect` | Confirmed: the inspected image runs as `app`; build-context exclusions were reviewed. | No Dockerfile change. |

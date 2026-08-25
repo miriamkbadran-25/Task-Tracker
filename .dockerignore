@@ -23,3 +23,6 @@ dist/
 Thumbs.db
 *.sublime-workspace
 *.sublime-project
+*.exe
+.tools/
+.git/
