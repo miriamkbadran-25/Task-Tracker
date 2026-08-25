@@ -6,7 +6,7 @@
 - Date: 25 August 2026
 - Local app run command: `cd backend; uvicorn app.main:app --reload --port 8000` (not run directly; the same app was verified through Docker Compose).
 - /health result: `docker compose up --build --detach --wait` reported the service `healthy`; `GET http://127.0.0.1:8000/health` returned HTTP 200 with `{"status":"ok", ...}`. The verification stack was removed with `docker compose down`.
-- Frontend check: `test_root_serves_frontend_html` passed, confirming that `GET /` serves the expected HTML. A browser check of the Kanban board and create/edit flow is **not confirmed** in this evidence record.
+- Frontend check: `test_root_serves_frontend_html` passed, confirming that `GET /` serves the expected HTML. Manual browser verification confirmed that the Kanban board is visible and that a task can be created and edited through the frontend.
 - Test command: `cd backend; .\\.venv\\Scripts\\python.exe -m pytest -v`
 - Test result: Python 3.11.9; all 3 tests passed. `python -m pip check` reported no broken requirements.
 
@@ -29,6 +29,6 @@
 
 | Claim checked | Evidence used | Result | Change made, if any |
 |---|---|---|---|
-| The frontend is served by the FastAPI app at `/`. | `backend/app/main.py`; `backend/tests/test_frontend_integration.py` | Confirmed by code and a passing automated test; browser interaction was not run. | Recorded the evidence and limitation in this release note. |
+| The frontend is served by the FastAPI app at `/`. | `backend/app/main.py`; `backend/tests/test_frontend_integration.py`; manual browser check | Confirmed by code, a passing automated test, and manual verification that the Kanban board is visible and supports task creation and editing. | Recorded the evidence in this release note. |
 | CI is configured to run the project test suite on Python 3.11. | `.github/workflows/ci.yml`; `backend/requirements.txt` | Confirmed by workflow review. A successful run for the current revision was not independently verified. | No workflow change. |
 | The container runs as a non-root user and excludes common environment files from its build context. | `Dockerfile`; `.dockerignore`; `docker image inspect` | Confirmed: the inspected image runs as `app`; build-context exclusions were reviewed. | No Dockerfile change. |

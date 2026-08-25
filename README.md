@@ -144,6 +144,9 @@ Verified in this workspace on August 25, 2026:
   reported the service healthy, and `GET /health` returned a JSON
   response with `"status": "ok"`. The verification stack was removed
   afterward with `docker compose down`.
+- **Frontend browser flow:** Manual verification confirmed that the Kanban
+  board is visible and that a task can be created and edited through the
+  frontend.
 - **Runtime image:** `docker image inspect` confirmed the image runs as
   the unprivileged `app` user and exposes `8000/tcp`.
 
