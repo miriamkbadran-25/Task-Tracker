@@ -13,7 +13,7 @@
 ## CI evidence
 
 - Workflow file: `.github/workflows/ci.yml` — AI-Assisted Coding - Final Course Project Brief
-- Latest green run: [CI run #11 for `b1a9188`](https://github.com/miriamkbadran-25/Task-Tracker/actions/runs/32878067301) completed successfully on 25 August 2026.
+- Latest green run: [CI run #14 for `326dd8b`](https://github.com/miriamkbadran-25/Task-Tracker/actions/runs/32903741894) completed successfully on 25 August 2026.
 - Test command used by CI: `python -m pytest -v` from the `backend/` working directory, after installing `requirements.txt` on Python 3.11.
 - Shortcut check: Passed by workflow review. No `continue-on-error`, `|| true`, or pytest skip condition is present.
 
