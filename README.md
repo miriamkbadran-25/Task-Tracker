@@ -71,7 +71,8 @@ cd backend
 pytest -v
 ```
 
-This matches the command CI runs (`.github/workflows/ci.yml`).
+This is equivalent to the command CI runs (`python -m pytest -v` in
+`.github/workflows/ci.yml`).
 
 ## Run with Docker
 
@@ -96,10 +97,11 @@ Defined in `.github/workflows/ci.yml`:
 - Triggers: every `push` and every `pull_request` (no branch filters)
 - Runs on `ubuntu-latest`, working directory `backend/`
 - Sets up Python 3.11
-- Installs `backend/requirements.txt` plus an explicit `pytest`
-  (redundant today since `pytest` is already pinned in
-  `requirements.txt`)
-- Runs `pytest -v`
+- Installs `backend/requirements.txt` (which pins `pytest`)
+- Runs `python -m pytest -v`
+
+Latest verified green run: [CI #8](https://github.com/miriamkbadran-25/Task-Tracker/actions/runs/32836222446),
+completed successfully on August 25, 2026.
 
 CI only runs the test suite — there is no linting, type-checking,
 Docker build/push, or deployment step defined.
